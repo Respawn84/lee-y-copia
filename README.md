@@ -13,6 +13,27 @@ Una aplicación Windows diseñada específicamente para niños con TDAH y dentro
 1. **Motivación visual**: Los niños aprenden mejor copiando palabras que intentando leerlas directamente
 2. **Refuerzo auditivo**: La síntesis de voz (TTS) les permite asociar texto escrito con sonido
 
+---
+
+## 📖 ¿Por qué funciona este enfoque?
+
+Este programa aplica principios científicos de neurociencia educativa, teoría de la carga cognitiva y aprendizaje multimodal. **Si quieres entender los fundamentos pedagógicos** detrás del diseño:
+
+### 👉 **[Lee el Fundamento Pedagógico completo](FUNDAMENTO_PEDAGOGICO.md)**
+
+Incluye:
+- Teorías científicas (Vygotsky, Sweller, Paivio, Ericsson)
+- Por qué "copiar" funciona mejor que "leer" en esta fase
+- Aplicabilidad específica en TDAH y TEA
+- Estudios de neuroimagen sobre aprendizaje multimodal
+- Guías prácticas por fases de aprendizaje
+- Referencias bibliográficas completas
+
+**Resumen en 3 líneas:**  
+El cerebro aprende mejor cuando múltiples canales (visual + motor + auditivo) trabajan juntos. Copiar reduce la carga cognitiva y permite integrar sílabas en palabras completas como "unidades gestálticas". El feedback inmediato refuerza el aprendizaje sin frustración.
+
+---
+
 ## ✨ Características
 
 ### Para el niño:
@@ -148,20 +169,6 @@ La velocidad de la voz está configurada como `-3` (más lenta) para facilitar l
 synth.Rate = -3;  // Valores: -10 (muy lento) a 10 (muy rápido)
 ```
 
-## 🎓 Fundamento pedagógico
-
-Este programa se basa en tres principios:
-
-1. **Aprendizaje multimodal**: Combina visual (ver), motor (escribir) y auditivo (escuchar)
-2. **Práctica deliberada**: Repetición espaciada de patrones de palabras
-3. **Refuerzo inmediato**: Feedback instantáneo que refuerza el aprendizaje correcto
-
-La estrategia de **copiar en lugar de leer directamente** es especialmente efectiva para niños con TDAH/TEA porque:
-- Reduce la carga cognitiva inicial
-- Permite enfocarse en la integración sílaba-palabra
-- Proporciona una tarea concreta y completable
-- Genera sensación de logro inmediato
-
 ## 🤝 Contribuciones
 
 Este es un proyecto educativo de código abierto. Las contribuciones son bienvenidas:
@@ -178,15 +185,15 @@ Este proyecto está bajo licencia [MIT](LICENSE). Libre para usar, modificar y d
 
 ## 👨‍💻 Autor
 
-Desarrollado por Daniel ([@Respawn84](https://github.com/Respawn84)) como herramienta de apoyo para su hijo.
+Desarrollado por Daniel ([@Respawn84](https://github.com/Respawn84)) como herramienta de apoyo educativo.
 
 ---
 
 ## 💡 Inspiración y contexto
 
-Este programa nació de la observación directa: un niño, que tiene TDAH y está dentro del espectro autista, había asumido las sílabas pero no lograba integrarlas en palabras completas. Detecté que **copiar palabras** le ayudaba más que intentar leerlas directamente.
+Este programa nació de la observación directa de un niño con TDAH dentro del espectro autista que había asumido las sílabas pero no lograba integrarlas en palabras completas. La observación mostró que **copiar palabras** ayudaba más que intentar leerlas directamente.
 
-Combinando mi experiencia previa con tecnologías de asistencia en .NET/WinForms y el conocimiento de sus preferencias (Minecraft, referencias visuales), desarrollé esta herramienta en pocas horas. 
+Combinando experiencia previa con tecnologías de asistencia en .NET/WinForms y aprovechando elementos motivadores (Minecraft, referencias visuales), se desarrolló esta herramienta en pocas horas.
 
 **Si ayuda a un niño, el proyecto ya cumplió su propósito. Si ayuda a más, mejor.** 🌟
 
@@ -194,9 +201,10 @@ Combinando mi experiencia previa con tecnologías de asistencia en .NET/WinForms
 
 ### 🔗 Enlaces útiles
 
+- **[📖 Fundamento Pedagógico](FUNDAMENTO_PEDAGOGICO.md)** - Explicación científica completa
 - [Issues](../../issues) - Reporta problemas o sugiere mejoras
 - [Discussions](../../discussions) - Comparte experiencias y resultados
-- [Wiki](../../wiki) - Guías adicionales y recursos
+- [Releases](../../releases) - Descarga la última versión
 
 ### 🙏 Agradecimientos
 
