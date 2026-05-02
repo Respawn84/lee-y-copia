@@ -1,0 +1,52 @@
+{
+  "Frases": [
+    {
+      "Texto": "MI MAMA ME MIMA",
+      "Activa": true
+    },
+    {
+      "Texto": "EL PATO NADA",
+      "Activa": true
+    },
+    {
+      "Texto": "LA LUNA BRILLA",
+      "Activa": true
+    },
+    {
+      "Texto": "COMO UNA MANZANA",
+      "Activa": true
+    },
+    {
+      "Texto": "EL GATO DUERME",
+      "Activa": true
+    },
+    {
+      "Texto": "JUEGO CON BLOQUES",
+      "Activa": true
+    },
+    {
+      "Texto": "CAVO EN LA MINA",
+      "Activa": true
+    },
+    {
+      "Texto": "PONGO UNA ANTORCHA",
+      "Activa": true
+    },
+    {
+      "Texto": "VEO UN CREEPER",
+      "Activa": true
+    },
+    {
+      "Texto": "TENGO UNA ESPADA",
+      "Activa": true
+    },
+    {
+      "Texto": "PLANTO UNA SEMILLA",
+      "Activa": true
+    },
+    {
+      "Texto": "HAGO UNA CASA",
+      "Activa": true
+    }
+  ]
+}
