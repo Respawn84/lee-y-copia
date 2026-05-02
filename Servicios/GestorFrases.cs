@@ -68,6 +68,25 @@ namespace LeeyCopia.Servicios
             }
         }
 
+        public static int GetFrasesEnFichero()
+        { 
+            var frases = new ConfigFrases();
+            try
+            {
+                if (!File.Exists(rutaArchivo))
+                {
+                    return 0;
+                }
+                var json = File.ReadAllText(rutaArchivo, System.Text.Encoding.UTF8);
+                frases= JsonSerializer.Deserialize<ConfigFrases>(json) ?? new ConfigFrases();
+                return frases.Frases.Count;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error al cargar configFrases: {ex.Message}", ex);
+            }
+        }
+
         /// <summary>
         /// Obtiene la ruta donde se guardan las frases (útil para depuración).
         /// </summary>

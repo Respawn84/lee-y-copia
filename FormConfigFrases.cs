@@ -50,7 +50,31 @@ namespace LeeyCopia
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
+            ListViewItem listViewItemDeleted = null;
             //Logica para eliminar la frase seleccionada (se ve en pantalla con fondo azul)
+            foreach (ListViewItem lwi in listView1.SelectedItems)
+            {
+                var frase = configFrases.Frases.FirstOrDefault(f => f.Texto == lwi.Text, null);
+                if (frase != null)
+                {
+                    configFrases.Frases.Remove(frase);
+                    listViewItemDeleted = lwi;
+                }
+            }
+            if (listViewItemDeleted != null)
+                listView1.Items.Remove(listViewItemDeleted);
+        }
+
+        private void FormConfigFrases_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (configFrases.Frases.Count != GestorFrases.GetFrasesEnFichero())
+            {
+                if (MessageBox.Show("Hay cambios sin guardar ¿Salir sin guardar?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                {
+                    e.Cancel = true;
+                }
+                
+            }
         }
     }
 }

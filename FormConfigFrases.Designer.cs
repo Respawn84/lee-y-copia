@@ -99,6 +99,7 @@
             Controls.Add(listView1);
             Name = "FormConfigFrases";
             Text = "FormConfigFrases";
+            FormClosing += FormConfigFrases_FormClosing;
             Load += FormConfigFrases_Load;
             ResumeLayout(false);
             PerformLayout();
