@@ -10,10 +10,26 @@ namespace LeeyCopia
         private List<Frase> frasesActivas;
         private Random random;
         private string fraseActual = string.Empty;
+        private int frasesCopiadas = 0;
+        private bool impideCerrar = true;
+
+        // Estadísticas
+        private Modelo.Sesion sesionActual = new Modelo.Sesion();
+        private int indiceSesionActual = -1;
+        private DateTime inicioFrase;
+        private int fallosFraseActual = 0;
+        private bool sesionCerrada = false;
+        private System.Windows.Forms.Timer timerSesion = new System.Windows.Forms.Timer();
+        private int metaSesion = 0;
+        private HashSet<string> frasesUsadasEnSesion = new HashSet<string>();
+        private Modelo.Alumno? alumnoActual;
 
         public Form1()
         {
             InitializeComponent();
+
+            // Ventana maximizada
+            this.WindowState = FormWindowState.Maximized;
 
             // Inicializar TTS
             synth = new SpeechSynthesizer();
@@ -24,6 +40,10 @@ namespace LeeyCopia
             // Inicializar random
             random = new Random();
 
+            // Timer de sesión
+            timerSesion.Interval = 1000;
+            timerSesion.Tick += TimerSesion_Tick;
+
             // Cargar frases
             frasesActivas = new List<Frase>();
         }
@@ -32,6 +52,8 @@ namespace LeeyCopia
         {
             CargarFrasesActivas();
             MostrarSiguienteFrase();
+            this.WindowState = FormWindowState.Maximized;
+            CentrarContenido();
         }
 
         private void CargarFrasesActivas()
@@ -61,19 +83,102 @@ namespace LeeyCopia
             }
         }
 
-        private void MostrarSiguienteFrase()
+        private void IniciarSesion()
         {
             if (frasesActivas.Count == 0)
             {
-                textBoxOriginal.Text = "No hay frases disponibles";
-                fraseActual = string.Empty;
+                MessageBox.Show(
+                    "No hay frases activas. Ve a Configuración > Frases antes de iniciar una sesión.",
+                    "Sin frases", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Seleccionar frase aleatoria
-            int indice = random.Next(frasesActivas.Count);
-            fraseActual = frasesActivas[indice].Texto;
+            using var dlg = new FormInicioSesion(frasesActivas.Count, Servicios.GestorAlumnos.ObtenerTodos());
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            alumnoActual = dlg.AlumnoSeleccionado;
+            if (alumnoActual == null) return;
+            Servicios.GestorEstadisticas.AlumnoActual = alumnoActual.Nombre;
+            metaSesion = dlg.FrasesSeleccionadas;
+            frasesUsadasEnSesion.Clear();
+            groupBox1.Visible = true;
+            try
+            {
+                sesionActual = new Modelo.Sesion { FechaInicio = DateTime.Now };
+                indiceSesionActual = Servicios.GestorEstadisticas.IniciarSesion(sesionActual);
+                sesionCerrada = false;
+                frasesCopiadas = 0;
+                ActualizarContador();
+
+                finSesionToolStripMenuItem.Enabled = true;
+                reinicioDeSesiónToolStripMenuItem.Enabled = false;
+
+                timerSesion.Start();
+                toolStripStatusLabelTimer.Text = "⏳ 0:00";
+            }
+            catch
+            {
+                // No interrumpir si falla el guardado
+            }
+
+            MostrarSiguienteFrase();
+        }
+
+        private void CerrarSesion()
+        {
+            if (sesionCerrada || indiceSesionActual < 0)
+                return;
+            try
+            {
+                Servicios.GestorEstadisticas.CerrarSesion(indiceSesionActual, DateTime.Now);
+                sesionCerrada = true;
+            }
+            catch { }
+            groupBox1.Visible = false;
+            timerSesion.Stop();
+            toolStripStatusLabelTimer.Text = "⏳ Sin sesión";
+            finSesionToolStripMenuItem.Enabled = false;
+            reinicioDeSesiónToolStripMenuItem.Enabled = true;
+        }
+
+        private void TimerSesion_Tick(object? sender, EventArgs e)
+        {
+            if (sesionCerrada || indiceSesionActual < 0) return;
+            var elapsed = DateTime.Now - sesionActual.FechaInicio;
+            toolStripStatusLabelTimer.Text = $"⏳ {(int)elapsed.TotalMinutes}:{elapsed.Seconds:D2}";
+        }
+
+        void CentrarContenido()
+        {
+            groupBox1.Left = Screen.PrimaryScreen.WorkingArea.Width / 2 - groupBox1.Width / 2;
+            groupBox1.Top = Screen.PrimaryScreen.WorkingArea.Height / 2 - groupBox1.Height / 2;
+        }
+
+        private void MostrarSiguienteFrase()
+        {
+            var disponibles = frasesActivas
+                .Where(f => !frasesUsadasEnSesion.Contains(f.Texto))
+                .ToList();
+
+            if (disponibles.Count == 0)
+            {
+                // Sin más frases disponibles: cerrar sesión automáticamente
+                textBoxOriginal.Text = string.Empty;
+                textBox2.Clear();
+                fraseActual = string.Empty;
+                FinalizarSesionAutomatica();
+                return;
+            }
+
+            int indice = random.Next(disponibles.Count);
+            fraseActual = disponibles[indice].Texto;
+            frasesUsadasEnSesion.Add(fraseActual);
             textBoxOriginal.Text = fraseActual;
+
+            // Reiniciar contadores de la frase en curso
+            inicioFrase = DateTime.Now;
+            fallosFraseActual = 0;
 
             // Limpiar el área de copia
             textBox2.Clear();
@@ -102,8 +207,23 @@ namespace LeeyCopia
 
         private void btnNextFrase_Click(object sender, EventArgs e)
         {
+            // Saltar sin acertar: registrar como fallada
+            if (!string.IsNullOrWhiteSpace(fraseActual))
+            {
+                GuardarRegistroActual(acertada: false);
+
+                if (frasesUsadasEnSesion.Count >= metaSesion && metaSesion > 0)
+                {
+                    synth.SpeakAsync("¡Has terminado!");
+                    Task.Delay(1500).ContinueWith(t =>
+                    {
+                        this.Invoke((MethodInvoker)FinalizarSesionAutomatica);
+                    });
+                    return;
+                }
+            }
+
             MostrarSiguienteFrase();
-            // El foco ya se establece en MostrarSiguienteFrase()
         }
 
         private void btnCheckAndNext_Click(object sender, EventArgs e)
@@ -119,27 +239,74 @@ namespace LeeyCopia
 
             if (original == copiado)
             {
-                // Correcto - Retroalimentación positiva
+                // Correcto
+                frasesCopiadas++;
+                ActualizarContador();
+                GuardarRegistroActual(acertada: true);
                 MostrarResultado(true);
-                synth.SpeakAsync("¡Muy bien!");
-                
-                // Pasar directamente a la siguiente frase tras un breve delay
-                Task.Delay(1500).ContinueWith(t =>
+
+                if (frasesUsadasEnSesion.Count >= metaSesion && metaSesion > 0)
                 {
-                    this.Invoke((MethodInvoker)delegate
+                    // Meta alcanzada: cerrar sesión automáticamente
+                    synth.SpeakAsync("¡Has terminado! ¡Muy bien!");
+                    Task.Delay(2000).ContinueWith(t =>
                     {
-                        MostrarSiguienteFrase();
+                        this.Invoke((MethodInvoker)FinalizarSesionAutomatica);
                     });
-                });
+                }
+                else
+                {
+                    synth.SpeakAsync("¡Muy bien!");
+                    Task.Delay(1500).ContinueWith(t =>
+                    {
+                        this.Invoke((MethodInvoker)MostrarSiguienteFrase);
+                    });
+                }
             }
             else
             {
-                // Incorrecto - Retroalimentación
+                // Incorrecto: contar fallo
+                fallosFraseActual++;
                 MostrarResultado(false);
                 synth.SpeakAsync("Inténtalo de nuevo");
                 // Devolver foco a la caja de escritura
                 textBox2.Focus();
             }
+        }
+
+        private void FinalizarSesionAutomatica()
+        {
+            CerrarSesion();
+            FormEstadisticas frm = new FormEstadisticas();
+            frm.ShowDialog();
+        }
+
+        private void GuardarRegistroActual(bool acertada)
+        {
+            if (indiceSesionActual < 0 || sesionCerrada)
+                return;
+            try
+            {
+                var registro = new Modelo.RegistroSesion
+                {
+                    Fecha = inicioFrase,
+                    Frase = fraseActual,
+                    LongitudFrase = fraseActual.Trim().Length,
+                    SegundosEmpleados = Math.Round((DateTime.Now - inicioFrase).TotalSeconds, 1),
+                    Fallos = fallosFraseActual,
+                    Acertada = acertada
+                };
+                Servicios.GestorEstadisticas.GuardarRegistro(indiceSesionActual, registro);
+            }
+            catch
+            {
+                // No interrumpir el flujo del niño si falla el guardado
+            }
+        }
+
+        private void ActualizarContador()
+        {
+            toolStripStatusLabel1.Text = $"Frases copiadas: {frasesCopiadas}";
         }
 
         private string NormalizarTexto(string texto)
@@ -175,14 +342,36 @@ namespace LeeyCopia
         private void frasesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormConfigFrases frm = new FormConfigFrases();
-            frm.ShowDialog(); // Usar ShowDialog para que sea modal
-
-            // Recargar frases cuando se cierre el formulario de configuración
+            frm.ShowDialog();
             CargarFrasesActivas();
+        }
+
+        private void alumnosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormConfigAlumnos frm = new FormConfigAlumnos();
+            frm.ShowDialog();
+        }
+
+        private void estadísticasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormEstadisticas frm = new FormEstadisticas();
+            frm.ShowDialog();
+        }
+
+        private void finSesionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CerrarSesion();
+            this.TopMost = false;
+            FormEstadisticas frm = new FormEstadisticas();
+            frm.ShowDialog();
+            // Iniciar una sesión nueva para continuar si el niño sigue
+            IniciarSesion();
         }
 
         private void salirToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            CerrarSesion();
+            impideCerrar = false;
             Application.Exit();
         }
 
@@ -202,6 +391,17 @@ namespace LeeyCopia
                 }
             }
             base.Dispose(disposing);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = impideCerrar; //Si clicamos en Programa -> Cerrar se permite el FormClosing.
+        }
+
+        private void reinicioDeSesiónToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CerrarSesion();
+            IniciarSesion();
         }
     }
 }

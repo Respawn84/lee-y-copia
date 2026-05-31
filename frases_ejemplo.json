@@ -1,52 +1,26 @@
 {
   "Frases": [
-    {
-      "Texto": "MI MAMA ME MIMA",
-      "Activa": true
-    },
-    {
-      "Texto": "EL PATO NADA",
-      "Activa": true
-    },
-    {
-      "Texto": "LA LUNA BRILLA",
-      "Activa": true
-    },
-    {
-      "Texto": "COMO UNA MANZANA",
-      "Activa": true
-    },
-    {
-      "Texto": "EL GATO DUERME",
-      "Activa": true
-    },
-    {
-      "Texto": "JUEGO CON BLOQUES",
-      "Activa": true
-    },
-    {
-      "Texto": "CAVO EN LA MINA",
-      "Activa": true
-    },
-    {
-      "Texto": "PONGO UNA ANTORCHA",
-      "Activa": true
-    },
-    {
-      "Texto": "VEO UN CREEPER",
-      "Activa": true
-    },
-    {
-      "Texto": "TENGO UNA ESPADA",
-      "Activa": true
-    },
-    {
-      "Texto": "PLANTO UNA SEMILLA",
-      "Activa": true
-    },
-    {
-      "Texto": "HAGO UNA CASA",
-      "Activa": true
-    }
+    { "Texto": "MI MAMA ME MIMA", "Activa": true },
+    { "Texto": "EL PATO NADA", "Activa": true },
+    { "Texto": "LA LUNA BRILLA", "Activa": true },
+    { "Texto": "COMO UNA MANZANA", "Activa": true },
+    { "Texto": "EL GATO DUERME", "Activa": true },
+    { "Texto": "JUEGO CON BLOQUES", "Activa": true },
+    { "Texto": "CAVO EN LA MINA", "Activa": true },
+    { "Texto": "PONGO UNA ANTORCHA", "Activa": true },
+    { "Texto": "VEO UN CRIPER", "Activa": true },
+    { "Texto": "TENGO UNA ESPADA", "Activa": true },
+    { "Texto": "PLANTO UNA SEMILLA", "Activa": true },
+    { "Texto": "HAGO UNA CASA", "Activa": true },
+    { "Texto": "EL PERRO LADRA", "Activa": true },
+    { "Texto": "BEBO AGUA PURA", "Activa": true },
+    { "Texto": "EL PERRO ESTA CONTENTO", "Activa": true },
+    { "Texto": "SUBO AL ARBOL", "Activa": true },
+    { "Texto": "NADO EN EL RIO", "Activa": true },
+    { "Texto": "TOMO MI LECHE", "Activa": true },
+    { "Texto": "LA VELA VUELA", "Activa": true },
+    { "Texto": "VIVO EN UNA CUEVA", "Activa": true },
+    { "Texto": "PICO UNA PIEDRA", "Activa": true },
+    { "Texto": "METO MAS LEÑA", "Activa": true }
   ]
 }
