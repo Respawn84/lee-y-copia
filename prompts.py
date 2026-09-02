@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""
+prompts.py -- Prompts de cada seccion del menu.
+
+Todos comparten SYSTEM_TERMINAL, que impone el estilo que necesita una
+pantalla de texto DOS de 80 columnas: sin markdown, sin acentos raros,
+frases cortas. Las funciones de abajo construyen el prompt de usuario
+de cada opcion metiendo la fecha de hoy y los datos de config.py.
+"""
+
+import time
+
+import config
+
+SYSTEM_TERMINAL = """Estas escribiendo en la pantalla de un ordenador
+Intel 286 de 1990 con MS-DOS, conectado por RS232 a 9600 baudios a una
+Raspberry Pi que hace de puente. La pantalla es de texto, 80 columnas.
+
+Reglas de estilo, MUY IMPORTANTES:
+- Texto plano. NADA de markdown: ni **negrita**, ni `codigo`, ni #
+  titulos, ni tablas, ni listas con guiones o asteriscos. Si necesitas
+  enumerar, usa "1) ", "2) " al principio de linea.
+- No uses emojis ni simbolos raros. Solo ASCII y acentos normales.
+- Lineas cortas: nunca pases de 68 caracteres por linea.
+- Se conciso y directo. El texto tarda en llegar: cada caracter viaja
+  por un cable serie lento. Sobra todo lo que no sea informacion.
+- No digas que has buscado en internet ni describas tu proceso. Da el
+  resultado y ya.
+"""
+
+SYSTEM_CHAT = SYSTEM_TERMINAL + """
+Estas en el modo de conversacion libre. Puedes charlar de lo que sea,
+opinar y bromear. Para CUALQUIER dato factual verificable (fechas,
+cifras, nombres, eventos, noticias, tiempo, resultados deportivos)
+usa SIEMPRE la busqueda web antes de responder, aunque creas saber la
+respuesta.
+"""
+
+
+def _hoy() -> str:
+    return time.strftime("%d/%m/%Y")
+
+
+def noticias_economicas() -> str:
+    return f"""Hoy es {_hoy()}. Busca en internet las noticias de
+economia y mercados mas importantes de las ultimas 24 horas, con foco en
+{config.PAIS_NOTICIAS} y en lo internacional que afecte a
+{config.PAIS_NOTICIAS}.
+
+Dame las {config.NUM_NOTICIAS} mas relevantes. Formato exacto:
+
+1) TITULAR EN UNA LINEA
+   Dos frases explicando que ha pasado y por que importa.
+
+Deja una linea en blanco entre noticia y noticia. No pongas
+introduccion ni conclusion, empieza directamente por la noticia 1."""
+
+
+def noticias_politicas() -> str:
+    return f"""Hoy es {_hoy()}. Busca en internet las noticias de
+politica mas importantes de las ultimas 24 horas, con foco en
+{config.PAIS_NOTICIAS} y algo de internacional relevante.
+
+Dame las {config.NUM_NOTICIAS} mas relevantes. Formato exacto:
+
+1) TITULAR EN UNA LINEA
+   Dos frases explicando que ha pasado y por que importa.
+
+Deja una linea en blanco entre noticia y noticia. Se neutral: cuenta
+los hechos, no opines. No pongas introduccion ni conclusion, empieza
+directamente por la noticia 1."""
+
+
+def tiempo(ciudad: str = None) -> str:
+    lugar = ciudad or f"{config.CIUDAD}, {config.PAIS}"
+    return f"""Hoy es {_hoy()}. Busca en internet la prevision
+meteorologica para {lugar}.
+
+Formato exacto, sin nada mas:
+
+PREVISION PARA {lugar.upper()}
+
+AHORA: temperatura, cielo, viento, humedad.
+
+HOY: maxima y minima, resumen en una frase, probabilidad de lluvia.
+
+MANANA: maxima y minima, resumen en una frase.
+
+PROXIMOS DIAS:
+Dia   Max  Min  Resumen corto
+(tres dias mas, una linea cada uno, alineado en columnas)
+
+AVISOS: solo si hay alerta meteorologica activa; si no, omite esta
+linea entera."""
+
+
+def cotizaciones() -> str:
+    acciones = "\n".join(f"- {a}" for a in config.ACCIONES)
+    cryptos = "\n".join(f"- {c}" for c in config.CRYPTOS)
+    divisas = "\n".join(f"- {d}" for d in config.DIVISAS)
+    return f"""Hoy es {_hoy()}. Busca en internet la cotizacion actual
+de estos valores:
+
+ACCIONES E INDICES:
+{acciones}
+
+CRIPTOMONEDAS:
+{cryptos}
+
+DIVISAS:
+{divisas}
+
+Formato exacto, en columnas alineadas y sin nada mas:
+
+COTIZACIONES  {_hoy()}
+
+ACCIONES E INDICES
+Valor            Precio        Var.dia
+...
+
+CRIPTOMONEDAS
+Valor            Precio        Var.dia
+...
+
+DIVISAS
+Par              Cambio        Var.dia
+...
+
+Al final, una sola linea que empiece por "NOTA:" diciendo la hora de
+los datos y si el mercado esta abierto o cerrado."""
+
+
+def valor_suelto(consulta: str) -> str:
+    return f"""Hoy es {_hoy()}. Busca en internet la cotizacion actual
+de: {consulta}
+
+Responde en pocas lineas: precio, variacion del dia, y una frase de
+contexto si ha pasado algo destacable. Nada mas."""
+
+
+def tiempo_suelto(consulta: str) -> str:
+    return tiempo(consulta)
+
+
+def efemerides() -> str:
+    return f"""Hoy es {_hoy()}. Busca que paso un dia como hoy en la
+historia. Dame 5 efemerides interesantes, una por linea, con este
+formato exacto:
+
+1795 - Lo que paso, en una frase.
+
+Ordenadas de mas antigua a mas reciente. Sin introduccion ni
+conclusion."""

@@ -1,0 +1,9 @@
+# La clave de la API NUNCA se sube.
+api.env
+
+# Datos generados en la Raspberry, no son codigo.
+notas.txt
+
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,64 @@
+# Plantilla del servicio del broker. NO se instala tal cual: los
+# marcadores @...@ los rellena instalar_servicio.sh con el usuario, la
+# ruta y el puerto reales de esta Raspberry.
+
+[Unit]
+Description=Broker serie 286 <-> Claude (PerellaSoft)
+Documentation=file://@DIR@/README.md
+
+# El servicio va atado al conversor USB-serie: arranca cuando el
+# aparato aparece (al encender o al enchufarlo en caliente) y se para
+# solo si lo desenchufas, en vez de quedarse dando vueltas contra un
+# /dev/ que no existe.
+BindsTo=@DEVUNIT@
+After=@DEVUNIT@
+
+# Las opciones 1-4 y el chat necesitan salir a internet. No es
+# bloqueante: si al arrancar aun no hay red, el menu y las
+# aplicaciones locales funcionan igual y solo fallan las consultas.
+Wants=network-online.target
+After=network-online.target
+
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=@USUARIO@
+# Sin Group=: systemd usa el grupo primario del usuario, sea el que sea.
+# dialout da acceso a /dev/ttyUSB*; el script se encarga de anadir el
+# usuario al grupo si no estaba.
+SupplementaryGroups=dialout
+
+WorkingDirectory=@DIR@
+ExecStart=@PYTHON@ @DIR@/broker_v2.py
+
+# Sin buffer: si no, los print() del broker se quedan atascados en el
+# buffer de stdout y no aparecen en journalctl hasta que se llena.
+Environment=PYTHONUNBUFFERED=1
+
+Restart=always
+RestartSec=5
+
+# El broker escribe byte a byte con sleeps muy cortos; sin esto compite
+# con cualquier otra cosa que este haciendo la Pi y se pierden bytes en
+# el 286, que no tiene FIFO en la UART.
+Nice=-5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=broker286
+
+# Endurecimiento basico: el broker solo necesita leer su carpeta,
+# escribir notas.txt y abrir el puerto serie.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=@DIR@
+
+[Install]
+# Atado al aparato, no a multi-user.target: asi si arrancas la Pi con
+# el cable desenchufado no queda un servicio en estado "failed", y al
+# enchufarlo se pone en marcha solo.
+WantedBy=@DEVUNIT@
